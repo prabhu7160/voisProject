@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,6 +37,7 @@ public class ProductController {
 	}         
 //PUT
 	@PutMapping("/edit/{productId}")
+	@PreAuthorize("hasAuthority('ROLE_USER')")
 	public ResponseEntity<ProductsDto> updateProduct(@RequestBody ProductsDto productDto, @PathVariable Integer productId){
 		ProductsDto updatedProduct = this.productService.updateProduct(productDto, productId);
 		return ResponseEntity.ok(updatedProduct);
@@ -43,17 +45,20 @@ public class ProductController {
 
 //DELETE
 	@DeleteMapping("/delete/{productId}")
+	@PreAuthorize("hasAuthority('ROLE_ADMIN')")
 	public ResponseEntity<ApiResponse> deleteProduct(@PathVariable Integer productId){
 		this.productService.deleteProductById(productId);
 		return new ResponseEntity<ApiResponse>(new ApiResponse("Area deleted successfully",true),HttpStatus.OK);
 	}
 //GET
 	@GetMapping("/display/all")
+	@PreAuthorize("hasAuthority('ROLE_ADMIN')")
 	public ResponseEntity<List<ProductsDto>> displayAllProduct() {
 		return ResponseEntity.ok(this.productService.getAllProducts());
 	}
 	
 	@GetMapping("/display/{productId}")
+	@PreAuthorize("hasAuthority('ROLE_USER')")
 	public ResponseEntity<ProductsDto> getProductById(@PathVariable Integer productId){
 		return ResponseEntity.ok(this.productService.getProductById(productId));
 	}

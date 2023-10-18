@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.vois.user.dto.UsersDto;
@@ -20,6 +21,8 @@ public class UserServiceImpl implements UserService{
 	private UserRepo userRepo;
 	@Autowired
 	private ModelMapper modelMapper;
+	@Autowired
+	private PasswordEncoder passwordEnc;
 
 //	@Override
 //    public UsersDto getUserById(Integer userId) {
@@ -29,14 +32,12 @@ public class UserServiceImpl implements UserService{
 //    }
 	@Override
 	public UsersDto getUserById(Integer userId) {
-		// TODO Auto-generated method stub
 		UsersDetails user = this.userRepo.findById(userId).orElseThrow(()-> new ResourceNotFoundException("UsersDetails","userId",userId));
 		return this.userToDto(user);
 	}
 
 	@Override
 	public List<UsersDto> getAllUsers() {
-		// TODO Auto-generated method stub
 		List<UsersDetails> users = this.userRepo.findAll();
 		List<UsersDto> usersDto = users.stream().map(user->this.userToDto(user)).collect(Collectors.toList());
 		return usersDto;
@@ -70,9 +71,15 @@ public class UserServiceImpl implements UserService{
 	@Override
 	public UsersDto createUser(UsersDto userDto) {
 		UsersDetails user = this.dtoToUser(userDto);
+		user.setPassword(passwordEnc.encode(userDto.getPassword()));
 		UsersDetails savedUser = this.userRepo.save(user);
 		return this.userToDto(savedUser);
 	}
+//	public UserInfo addUser(UserInfo user) {
+//		user.setPassword(passwordEnc.encode(user.getPassword()));
+//		repo.save(user);
+//		return user;
+//	}
 
 	@Override
 	public UsersDto updateUser(UsersDto userDto, Integer userId) {
@@ -89,4 +96,5 @@ public class UserServiceImpl implements UserService{
 		
 		return updatedUserDto;
 	}
+
 }

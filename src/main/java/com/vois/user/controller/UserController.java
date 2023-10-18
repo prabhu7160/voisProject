@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,7 +33,14 @@ public class UserController {
 	Logger logger = LoggerFactory.getLogger(UserController.class); //slf4j implementation
 	@Autowired
 	private UserService userService;
-	
+//	@PostMapping("/new")
+//	public ResponseEntity<UserInfo> createNewUser(
+//			@RequestBody UserInfo use)
+//	{
+//		UserInfo addUser = productService.addUser(use);
+//		return new ResponseEntity<>(addUser,HttpStatus.CREATED);
+//		
+//	}
 	@PostMapping("/add")
 	public ResponseEntity<UsersDto> createNewUser(
 			@Valid @RequestBody UsersDto userDto)
@@ -45,6 +53,7 @@ public class UserController {
 	}
 //PUT
 	@PutMapping("/edit/{userId}")
+	@PreAuthorize("hasAuthority('ROLE_USER')")
 	public ResponseEntity<UsersDto> updateUser(@RequestBody UsersDto userDto, @PathVariable Integer userId){
 		UsersDto updatedUser = this.userService.updateUser(userDto, userId);
 		return ResponseEntity.ok(updatedUser);
@@ -52,17 +61,20 @@ public class UserController {
 
 //DELETE
 	@DeleteMapping("/delete/{userId}")
+	@PreAuthorize("hasAuthority('ROLE_ADMIN')")
 	public ResponseEntity<ApiResponse> deleteUser(@PathVariable Integer userId){
 		this.userService.deleteUserById(userId);
-		return new ResponseEntity<ApiResponse>(new ApiResponse("Area deleted successfully",true),HttpStatus.OK);
+		return new ResponseEntity<ApiResponse>(new ApiResponse("User deleted successfully",true),HttpStatus.OK);
 	}
 //GET
 	@GetMapping("/display/all")
+	@PreAuthorize("hasAuthority('ROLE_ADMIN')")
 	public ResponseEntity<List<UsersDto>> displayAllUsers() {
 		return ResponseEntity.ok(this.userService.getAllUsers());
 	}
 	
 	@GetMapping("/display/{userId}")
+	@PreAuthorize("hasAuthority('ROLE_USER')")
 	public ResponseEntity<UsersDto> getUserById(@PathVariable Integer userId){
 		return ResponseEntity.ok(this.userService.getUserById(userId));
 	}
